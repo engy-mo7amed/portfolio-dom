@@ -1,51 +1,40 @@
-let navLinks = document.querySelectorAll(".nav-links a");
-let sections = document.querySelectorAll("section[id]");
-let menuBtn = document.getElementById("menu-toggle");
-let menuNavLinks = document.querySelector(".nav-links");
+const navLinks = document.querySelectorAll(".nav-links a");
+const sections = document.querySelectorAll("section[id]");
+const menuBtn = document.getElementById("menu-toggle");
+const menuNavLinks = document.querySelector(".nav-links");
 
-//////////////// Display Navbar Active ////////////////////
+////////////////  Navbar Active ////////////////////
 
-function setActiveLink(clickedLink) {
-  for (let i = 0; i < navLinks.length; i++) {
-    navLinks[i].classList.remove("active");
-  }
-  clickedLink.classList.add("active");
+function setActiveLink(link) {
+  navLinks.forEach((l) => l.classList.remove("active"));
+  link.classList.add("active");
 }
-if (navLinks[0]) {
-  setActiveLink(navLinks[0]);
-}
-for (let i = 0; i < navLinks.length; i++) {
-  navLinks[i].addEventListener("click", function (e) {
-    setActiveLink(e.target);
+setActiveLink(navLinks[0]);
+
+navLinks.forEach((link) => {
+  link.addEventListener("click", () => {
+    setActiveLink(link);
     menuNavLinks.classList.remove("show");
   });
-}
+});
 
 const observer = new IntersectionObserver(
-  function (entries) {
-    for (let i = 0; i < entries.length; i++) {
-      if (entries[i].isIntersecting) {
-        const id = entries[i].target.id;
-        const matchingLink = document.querySelector(
-          '.nav-links a[href="#' + id + '"]',
+  (entries) => {
+    entries.forEach((entry) => {
+      if (entry.isIntersecting) {
+        const link = document.querySelector(
+          `.nav-links a[href="#${entry.target.id}"]`,
         );
-        if (matchingLink) {
-          setActiveLink(matchingLink);
-        }
+        if (link) setActiveLink(link);
       }
-    }
+    });
   },
-  {
-    threshold: 0.2,
-    rootMargin: "-80px 0px 0px 0px",
-  },
+  { threshold: 0.2, rootMargin: "-80px 0px 0px 0px" },
 );
 
-for (let i = 0; i < sections.length; i++) {
-  observer.observe(sections[i]);
-}
+sections.forEach((section) => observer.observe(section));
 
-menuBtn.addEventListener("click", function () {
+menuBtn.addEventListener("click", () => {
   menuNavLinks.classList.toggle("show");
 });
 /////////////// change dark mode //////////////////
@@ -53,44 +42,37 @@ menuBtn.addEventListener("click", function () {
 const themeToggleButton = document.getElementById("theme-toggle-button");
 const html = document.documentElement;
 
-themeToggleButton.addEventListener("click", function () {
-  if (html.classList.contains("dark")) {
-    html.classList.remove("dark");
-    themeToggleButton.setAttribute("aria-pressed", "false");
-  } else {
-    html.classList.add("dark");
-    themeToggleButton.setAttribute("aria-pressed", "true");
-  }
+themeToggleButton.addEventListener("click", () => {
+  html.classList.toggle("dark");
 });
 
-////////////////// portfolio filter //////////////////
-function initPortfolioFilter() {
-  let filterButtons = document.querySelectorAll(".portfolio-filter");
-  let portfolioItems = document.querySelectorAll(".portfolio-item");
-  let filterValue, itemCategory;
+////////////////// nav-taps //////////////////
 
-  for (let i = 0; i < filterButtons.length; i++) {
-    filterButtons[i].addEventListener("click", function () {
-      for (let j = 0; j < filterButtons.length; j++) {
-        filterButtons[j].classList.remove("active");
-        filterButtons[j].setAttribute("aria-pressed", "false");
-        filterButtons[j].classList.remove(
+function PortfolioFilter() {
+  const filterButtons = document.querySelectorAll(".portfolio-filter");
+  const portfolioItems = document.querySelectorAll(".portfolio-item");
+
+  filterButtons.forEach((button) => {
+    button.addEventListener("click", function () {
+      filterButtons.forEach((btn) => {
+        btn.classList.remove(
+          "active",
           "bg-linear-to-r",
           "from-primary",
           "to-secondary",
           "text-white",
         );
-        filterButtons[j].classList.add(
+        btn.classList.add(
           "bg-white",
           "dark:bg-slate-800",
           "text-slate-600",
           "dark:text-slate-300",
         );
-      }
+        btn.setAttribute("aria-pressed", "false");
+      });
 
-      this.classList.add("active");
-      this.setAttribute("aria-pressed", "true");
       this.classList.add(
+        "active",
         "bg-linear-to-r",
         "from-primary",
         "to-secondary",
@@ -102,55 +84,53 @@ function initPortfolioFilter() {
         "text-slate-600",
         "dark:text-slate-300",
       );
+      this.setAttribute("aria-pressed", "true");
 
-      filterValue = this.getAttribute("data-filter");
+      const filterValue = this.getAttribute("data-filter");
 
-      for (let j = 0; j < portfolioItems.length; j++) {
-        itemCategory = portfolioItems[j].getAttribute("data-category");
+      portfolioItems.forEach((item) => {
+        const itemCategory = item.getAttribute("data-category");
 
         if (filterValue === "all" || filterValue === itemCategory) {
-          portfolioItems[j].style.display = "";
+          item.style.display = "";
         } else {
-          portfolioItems[j].style.display = "none";
+          item.style.display = "none";
         }
-      }
+      });
     });
-  }
+  });
 }
-initPortfolioFilter();
 
-///////////////////// Testimonials Carousel////////////////////////
+PortfolioFilter();
 
-let carousel = document.getElementById("testimonials-carousel");
-let cards = document.querySelectorAll(".testimonial-card");
-let indicators = document.querySelectorAll(".carousel-indicator");
-let nextBtn = document.getElementById("next-testimonial");
-let prevBtn = document.getElementById("prev-testimonial");
-
+/////////////////////  Carousel////////////////////////
+const carousel = document.getElementById("testimonials-carousel");
+const cards = document.querySelectorAll(".testimonial-card");
+const indicators = document.querySelectorAll(".carousel-indicator");
+const nextBtn = document.getElementById("next-testimonial");
+const prevBtn = document.getElementById("prev-testimonial");
 let currentIndex = 0;
 
-function getVisibleCount() {
+const getVisibleCount = () => {
   if (window.innerWidth >= 1024) return 3;
   if (window.innerWidth >= 640) return 2;
   return 1;
-}
+};
 
-function getMaxIndex() {
-  return cards.length - getVisibleCount();
-}
+const getMaxIndex = () => cards.length - getVisibleCount();
 
 function updateCarousel() {
   const cardWidth = cards[0].offsetWidth;
   carousel.style.transform = `translateX(${currentIndex * cardWidth}px)`;
 
-  for (let i = 0; i < indicators.length; i++) {
+  indicators.forEach((indicator, i) => {
     const isActive = i === currentIndex;
-    indicators[i].classList.toggle("bg-accent", isActive);
-    indicators[i].classList.toggle("w-6", isActive);
-    indicators[i].classList.toggle("bg-slate-400", !isActive);
-    indicators[i].classList.toggle("dark:bg-slate-600", !isActive);
-    indicators[i].setAttribute("aria-selected", isActive);
-  }
+    indicator.classList.toggle("bg-accent", isActive);
+    indicator.classList.toggle("w-6", isActive);
+    indicator.classList.toggle("bg-slate-400", !isActive);
+    indicator.classList.toggle("dark:bg-slate-600", !isActive);
+    indicator.setAttribute("aria-selected", isActive);
+  });
 }
 
 nextBtn.addEventListener("click", () => {
@@ -163,12 +143,12 @@ prevBtn.addEventListener("click", () => {
   updateCarousel();
 });
 
-for (let i = 0; i < indicators.length; i++) {
-  indicators[i].addEventListener("click", () => {
+indicators.forEach((indicator, i) => {
+  indicator.addEventListener("click", () => {
     currentIndex = Math.min(i, getMaxIndex());
     updateCarousel();
   });
-}
+});
 
 window.addEventListener("resize", () => {
   currentIndex = Math.min(currentIndex, getMaxIndex());
@@ -177,98 +157,76 @@ window.addEventListener("resize", () => {
 
 updateCarousel();
 
-////////////////// Contact Form Validation //////////////////
+//////////////////  Validation form //////////////////
 
-let sendBtn = document.getElementById("send-btn");
+const sendBtn = document.getElementById("send-btn");
+const fields = {
+  fullName: {
+    input: document.getElementById("full-name"),
+    error: document.getElementById("full-name-error"),
+  },
+  email: {
+    input: document.getElementById("email"),
+    error: document.getElementById("email-error"),
+  },
+  phone: {
+    input: document.getElementById("phone"),
+    error: document.getElementById("phone-error"),
+  },
+  projectDetails: {
+    input: document.getElementById("project-details"),
+    error: document.getElementById("project-details-error"),
+  },
+};
 
-let fullName = document.getElementById("full-name");
-let email = document.getElementById("email");
-let phone = document.getElementById("phone");
-let projectDetails = document.getElementById("project-details");
-
-let fullNameError = document.getElementById("full-name-error");
-let emailError = document.getElementById("email-error");
-let phoneError = document.getElementById("phone-error");
-let projectDetailsError = document.getElementById("project-details-error");
-
-sendBtn.addEventListener("click", function () {
-  if (fullName.value.trim() === "") {
-    fullNameError.classList.remove("hidden");
-  }
-
-  if (email.value.trim() === "") {
-    emailError.classList.remove("hidden");
-  }
-
-  if (phone.value.trim() === "") {
-    phoneError.classList.remove("hidden");
-  }
-
-  if (projectDetails.value.trim() === "") {
-    projectDetailsError.classList.remove("hidden");
-  }
-});
-fullName.addEventListener("input", function () {
-  if (fullName.value.trim() !== "") {
-    fullNameError.classList.add("hidden");
-  }
-});
-
-email.addEventListener("input", function () {
-  if (email.value.trim() !== "") {
-    emailError.classList.add("hidden");
-  }
-});
-
-phone.addEventListener("input", function () {
-  if (phone.value.trim() !== "") {
-    phoneError.classList.add("hidden");
-  }
-});
-
-projectDetails.addEventListener("input", function () {
-  if (projectDetails.value.trim() !== "") {
-    projectDetailsError.classList.add("hidden");
-  }
-});
-
-let customSelects = document.querySelectorAll(".custom-select");
-
-for (let i = 0; i < customSelects.length; i++) {
-  customSelects[i].addEventListener("click", function () {
-    let options = this.nextElementSibling;
-    options.classList.toggle("hidden");
-
-    let icon = this.querySelector("i");
-    icon.classList.toggle("rotate-180");
-  });
-}
-
-document.addEventListener("click", function (e) {
-  for (let i = 0; i < customSelects.length; i++) {
-    if (!customSelects[i].contains(e.target)) {
-      customSelects[i].nextElementSibling.classList.add("hidden");
-      customSelects[i].querySelector("i").classList.remove("rotate-180");
+sendBtn.addEventListener("click", () => {
+  Object.values(fields).forEach(({ input, error }) => {
+    if (input.value.trim() === "") {
+      error.classList.remove("hidden");
     }
-  }
+  });
 });
 
-let customOptions = document.querySelectorAll(".custom-option");
+Object.values(fields).forEach(({ input, error }) => {
+  input.addEventListener("input", () => {
+    if (input.value.trim() !== "") {
+      error.classList.add("hidden");
+    }
+  });
+});
 
-for (let i = 0; i < customOptions.length; i++) {
-  customOptions[i].addEventListener("click", function () {
-    let value = this.getAttribute("data-value");
-    let wrapper = this.closest(".custom-select-wrapper");
-    let select = wrapper.querySelector(".custom-select");
-    let selectedText = select.querySelector(".selected-text");
+const customSelects = document.querySelectorAll(".custom-select");
+
+customSelects.forEach((select) => {
+  select.addEventListener("click", function (e) {
+    e.stopPropagation();
+    this.nextElementSibling.classList.toggle("hidden");
+    this.querySelector("i").classList.toggle("rotate-180");
+  });
+});
+
+document.addEventListener("click", (e) => {
+  customSelects.forEach((select) => {
+    if (!select.contains(e.target)) {
+      select.nextElementSibling.classList.add("hidden");
+      select.querySelector("i").classList.remove("rotate-180");
+    }
+  });
+});
+
+document.querySelectorAll(".custom-option").forEach((option) => {
+  option.addEventListener("click", function () {
+    const value = this.getAttribute("data-value");
+    const wrapper = this.closest(".custom-select-wrapper");
+    const select = wrapper.querySelector(".custom-select");
+    const selectedText = select.querySelector(".selected-text");
 
     selectedText.textContent = value;
     selectedText.classList.remove("text-slate-500", "dark:text-slate-400");
-
     wrapper.querySelector(".custom-options").classList.add("hidden");
     select.querySelector("i").classList.remove("rotate-180");
   });
-}
+});
 
 /////////////// Scroll to Top Button //////////////////
 let scrollToTopBtn = document.getElementById("scroll-to-top");
